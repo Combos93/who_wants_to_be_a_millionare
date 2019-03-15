@@ -7,7 +7,6 @@ gem 'devise-i18n'
 
 gem 'jquery-rails'
 gem 'twitter-bootstrap-rails'
-gem 'font-awesome-rails'
 gem 'russian'
 
 group :development, :test do
