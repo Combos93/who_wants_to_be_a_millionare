@@ -114,4 +114,84 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.current_game_question).to eq(next_level)
     end
   end
+
+  context "method answer_current_question" do
+    it 'return true if answer is right' do
+      level = game_w_questions.current_level
+      # текущий уровень вопроса; проверим что он его и вернёт
+      expect(game_w_questions.current_level).to eq(level)
+
+      q = game_w_questions.current_game_question
+      method = game_w_questions.answer_current_question!(q.correct_answer_key)
+      # повышаем текущий уровень вопроса, если ответ верен
+      level += 1
+
+      expect(game_w_questions.current_level).to eq(level)
+      expect(method).to be true
+    end
+
+    it 'return wrong answer if wrong' do
+      q = game_w_questions.current_game_question
+
+      method = game_w_questions.answer_current_question!(q.correct_answer_key)
+      method = false
+
+      expect(game_w_questions.current_game_question).not_to eq q
+      expect(method).to eq false
+
+      game_w_questions.send(:finish_game!)
+      game_w_questions.is_failed = true
+
+      game_w_questions.current_level = 5
+      game_w_questions.send(:fire_proof_prize, (game_w_questions.previous_level))
+
+      # наталкиваемся на FIREPROOF_LEVELS
+      if game_w_questions.previous_level == 4
+        prize = 1_000
+        expect(prize).to be > 0
+
+        user.balance += prize
+        expect(user.balance).to be prize
+      end
+    end
+
+    it 'return last question if question is last' do
+      level = game_w_questions.current_level
+      # текущий уровень вопроса; проверим что он его и вернёт
+      expect(game_w_questions.current_level).to eq(level)
+
+      q = game_w_questions.current_game_question
+      method = game_w_questions.answer_current_question!(q.correct_answer_key)
+      # повышаем текущий уровень вопроса, если ответ верен
+      level += 1
+
+      expect(game_w_questions.current_level).to eq(level)
+
+      game_w_questions.current_level = 14
+      last_q = game_w_questions.current_level
+
+      if last_q == Question::QUESTION_LEVELS.max + 1
+        game_w_questions.send(:finish_game!)
+        game_w_questions.is_failed = false
+
+        prize = PRIZES[Question::QUESTION_LEVELS.max]
+
+        expect(prize).to be > 0
+
+        user.balance += prize
+        expect(user.balance).to be prize
+      end
+    end
+
+    it 'return false if status if timeout' do
+      game_w_questions.finished_at = Time.now
+      expect(game_w_questions.finished?).to be_truthy
+
+      game_w_questions.created_at = 1.hour.ago
+      game_w_questions.is_failed = true
+
+      expect(game_w_questions.is_failed).to be_truthy
+      expect(game_w_questions.status).to be :timeout
+    end
+  end
 end
