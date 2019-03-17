@@ -49,7 +49,7 @@ class Game < ActiveRecord::Base
       # Созданной игре добавляем ровно 15 новых игровых вопросов разного уровня
       Question::QUESTION_LEVELS.each do |level|
         # Достаем из базы один произвольный вопрос нужной сложности
-        question = Question.where(level: level).order('RANDOM()').first
+        question = Question.where(level: level).order(Arel.sql('random()')).first
 
         # Перемешиваем ответы — цисла от 1 до 4
         answers = [1, 2, 3, 4].shuffle
