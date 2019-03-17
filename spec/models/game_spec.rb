@@ -94,24 +94,15 @@ RSpec.describe Game, type: :model do
 
   context "method previous_level" do
     it 'return sub current_level' do
-      game_w_questions.previous_level
-      prev_level = game_w_questions.current_level -= 1
-
-      expect(game_w_questions.current_level).to eq(prev_level)
+      # current_level сейчас равен 0 ; поэтому 0 -1 = (-1)
+      expect(game_w_questions.previous_level).to eq(-1)
     end
   end
 
   context "method current_game_question" do
-    it 'return current_question' do
-      # текущий game_questions level
-      level = game_w_questions.current_level
-      q = game_w_questions.current_game_question
-
-      # отвечаем на вопрос верно, сдвигая вопрос, на один уровень
-      game_w_questions.answer_current_question!(q.correct_answer_key)
-
-      next_level = game_w_questions.current_game_question
-      expect(game_w_questions.current_game_question).to eq(next_level)
+    it 'return current_game_question' do
+      # вытаскиваем конкретный обьект - текущий вопрос; то есть первый. Потому что игра только началась.
+      expect(game_w_questions.current_game_question).to eq(GameQuestion.find(1))
     end
   end
 
