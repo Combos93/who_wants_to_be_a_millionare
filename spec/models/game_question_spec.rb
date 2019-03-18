@@ -23,4 +23,10 @@ RSpec.describe GameQuestion, type: :model do
       expect(game_question.text).to eq(game_question.question.text)
     end
   end
+
+  context "method correct_answer_key" do
+    it 'return key of right answer' do
+     expect(game_question.correct_answer_key).to eq 'b'
+    end
+  end
 end
