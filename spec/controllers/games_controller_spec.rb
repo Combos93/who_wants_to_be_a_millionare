@@ -21,21 +21,24 @@ RSpec.describe GamesController, type: :controller do
       post :create
 
       expect(response.status).not_to eq(200)
-      expect(response.status).to eq(302)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be
     end
 
     it 'ban form #take_money' do
       put :take_money, params: { id: game_w_questions.id }
 
       expect(response.status).not_to eq(200)
-      expect(response.status).to eq(302)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be
     end
 
     it 'ban form #answer' do
       put :answer, params: { id: game_w_questions.id }
 
       expect(response.status).not_to eq(200)
-      expect(response.status).to eq(302)
+      expect(response).to redirect_to(new_user_session_path)
+      expect(flash[:alert]).to be
     end
   end
 
