@@ -1,26 +1,35 @@
+# (c) goodprogrammer.ru
+#
+# Админский контроллер, только для наполнения базы вопросов с помощью файлов
+# определенного формата
+# Создает новую игру, обновляет статус игры по ответам юзера, выдает подсказки
+#
 class QuestionsController < ApplicationController
-  # Проверяем, залогинен ли юзер
+  # проверяем залогинен ли юзер
   before_action :authenticate_user!
 
-  # Проверяем, есть ли у него права админа
+  # проверяем админ ли он
   before_action :authorize_admin!
 
+  # GET /questions/new
   # Форма для загрузки пачки вопросов
   def new
   end
 
-  # Обрабатываем форму, где есть файл вопросов и поле уровень
+  # POST /questions
+  # Обработка формы, содержащей файл с вопросами и поле - уровень
   def create
     level = params[:questions_level].to_i
     q_file = params[:questions_file]
 
-    # Читаем содержимое файла, делаем массив
+    # читаем содержимое файла в массив
+    # http://stackoverflow.com/questions/2521053/how-to-read-a-user-uploaded-file-without-saving-it-to-the-database
     if q_file.respond_to?(:readlines)
       file_lines = q_file.readlines
     elsif q_file.respond_to?(:path)
       file_lines = File.readlines(q_file.path)
     else
-      # Если файл нельзя прочитать, отправляем на экшен new и говорим об ошибках
+      # если файл нельзя прочитать, отправляем на экшен new c инфой об ошибках
       redirect_to new_questions_path, alert: "Bad file_data: #{q_file.class.name}, #{q_file.inspect}"
       return false
     end
@@ -29,7 +38,7 @@ class QuestionsController < ApplicationController
     # В одной большой транзакции создаем сразу массив вопросов, считаем неудачные
     failed_count = create_questions_from_lines(file_lines, level)
 
-    # Отправляем на страницу new и выводим статистику о проделаных операциях
+    # отправляем на страницу new и выводим статистику о проделаных операциях
     redirect_to new_questions_path,
                 notice: "Уровень #{level}, обработано #{file_lines.size}," +
                   " создано #{file_lines.size - failed_count}," +
@@ -45,6 +54,7 @@ class QuestionsController < ApplicationController
 
   # Загрузка массива вопросов в базе
   # Для скорости оборачиваем все в одну транзакцию
+  # см. https://www.coffeepowered.net/2009/01/23/mass-inserting-data-in-rails-without-killing-your-performance/
   def create_questions_from_lines(lines, level)
     failed = 0
     ActiveRecord::Base.transaction do
@@ -64,4 +74,5 @@ class QuestionsController < ApplicationController
 
     failed
   end
+
 end
