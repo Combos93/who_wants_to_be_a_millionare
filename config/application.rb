@@ -16,7 +16,7 @@ module Billionaire
     config.i18n.locale = :ru
     config.i18n.fallbacks = [:en]
 
-    config.time_zone = 'Moscow'
+    config.time_zone = 'Almaty'
 
   end
 end
