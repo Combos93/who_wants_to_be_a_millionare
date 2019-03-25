@@ -1,27 +1,29 @@
 require 'rails_helper'
 
 RSpec.describe 'users/show', type: :view do
-  before(:each) do
-    assign(:users, [
-      @user = FactoryBot.build_stubbed(:user, name: 'Вадик', balance: 5000)
-    ])
-    sign_in @user
+  context "when user look own profile" do
+    before(:each) do
+      @user = FactoryBot.create(:user, name: "Vasiliy")
+      @games = [FactoryBot.build_stubbed(:game, id: 1, created_at: Time.now, current_level: 6)]
 
-    stub_template 'users/_game.html.erb' => 'User game goes here'
+      sign_in @user
 
-    render
-  end
+      assign(:user, @user)
+      assign(:games, @games)
 
-  it 'renders current_user name' do
-    expect(rendered).to match(@user.name)
-  end
+      render
+    end
 
-  # пока не делал; но нашёл инфу/прочитал делается через assert и assert_select
-  it 'renders button for change password' do
-    expect(rendered).to match '3 000 ₽'
-  end
+    it 'renders current_user name' do
+      expect(rendered).to match "Vasiliy"
+    end
 
-  it 'renders partial _game' do
-    expect(rendered).to match('User game goes here')
+    it 'renders button for change password' do
+      expect(rendered).to match 'Сменить имя и пароль'
+    end
+
+    it 'renders partial _game' do
+      assert_template partial: "users/_game", count: @games.count
+    end
   end
 end
