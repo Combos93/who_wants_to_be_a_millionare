@@ -1,45 +1,38 @@
 require 'rails_helper'
-require 'capybara/rails'
-
 
 RSpec.feature 'USER creates a game', type: :feature do
-  let(:user) { FactoryBot.create :user }
-  let(:user2) { FactoryBot.create :user }
+  let(:user) { FactoryBot.create :user, name: 'Vasya' }
+  let(:user_2) { FactoryBot.create :user, name: 'Vanya' }
 
-  let!(:questions) do
-    (0..14).to_a.map do |i|
-      FactoryBot.create(
-        :question, level: i,
-        text: "Когда была куликовская битва номер #{i}?",
-        answer1: '1380', answer2: '1381', answer3: '1382', answer4: '1383'
-      )
-    end
-  end
-
-  let!(:questions2) do
-    (0..14).to_a.map do |i|
-      FactoryBot.create(
-        :question, level: i,
-        text: "Когда была снята Касабаланка #{i}?",
-        answer1: '1940', answer2: '1941', answer3: '1942', answer4: '1943'
-      )
-    end
-  end
+  let!(:games) {[
+    FactoryBot.create(:game, id: 15, user: user, prize: 10000, current_level: 6, is_failed: true,
+                      created_at: '2019-03-10 16:16:51', finished_at: '2019-03-10 16:21:51'),
+    FactoryBot.create(:game, id: 16, user: user, prize: 50000, current_level: 11, is_failed: false ,
+                      created_at: '2019-03-13 16:16:51', finished_at: '2019-03-13 16:21:51')
+  ]}
 
   before(:each) do
-    login_as user
+    login_as user_2
   end
 
   scenario 'success' do
     visit '/'
 
-    click_link 'Новая игра'
+    click_link 'Vasya'
 
-    expect(page).to have_content 'Когда была куликовская битва номер 0?'
+    expect(page).not_to have_content 'Сменить имя и пароль'
 
-    expect(page).to have_content '1380'
-    expect(page).to have_content '1381'
-    expect(page).to have_content '1382'
-    expect(page).to have_content '1383'
+    expect(page).to have_content '15'
+    expect(page).to have_content 'проигрыш'
+    expect(page).to have_content '10 марта, 16:16'
+    expect(page).to have_content '10 000 ₽'
+    expect(page).to have_content '6'
+
+
+    expect(page).to have_content '16'
+    expect(page).to have_content 'деньги'
+    expect(page).to have_content '13 марта, 16:16'
+    expect(page).to have_content '50 000 ₽'
+    expect(page).to have_content '11'
   end
 end

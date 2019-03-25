@@ -16,11 +16,11 @@ group :development, :test do
   gem 'factory_bot_rails'
   gem 'shoulda-matchers'
   gem 'rails-controller-testing'
+  gem 'capybara'
+  gem 'launchy'
 end
 
 group :test do
-  gem 'capybara'
-  gem 'launchy'
 end
 
 group :assets do

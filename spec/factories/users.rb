@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :user do
     name { "Жора_#{rand(777)}" }
 
-    sequence (:email) { |n| "someguy_#{n}@example.com" }
+    sequence (:email) { |n| "someguy1_#{n}@example.com" }
 
     is_admin {false}
 
