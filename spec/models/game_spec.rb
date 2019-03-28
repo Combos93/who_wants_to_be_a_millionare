@@ -99,97 +99,34 @@ RSpec.describe Game, type: :model do
     end
   end
 
-  describe 'answer_current_question!' do
-    context "current_game_question" do
-      it 'return current_game_question' do
-        # вытаскиваем конкретный обьект - текущий вопрос; то есть первый. Потому что игра только началась.
-        expect(game_w_questions.current_game_question).to eq(GameQuestion.find(1))
+  describe '#answer_current_question!' do
+    context "when answer was wrong and game was finishing" do
+      it 'game was finishing' do
+        game_w_questions.current_level = 12
+        expect(game_w_questions.answer_current_question!('c')).to be_falsey
+        expect(game_w_questions.finished?).to be_truthy
       end
     end
 
-    context "if answer is right" do
-      it 'return true' do
-        level = game_w_questions.current_level
-        # текущий уровень вопроса; проверим что он его и вернёт
-        expect(game_w_questions.current_level).to eq(level)
+    context 'when question is last in game' do
+      it 'won the game' do
+        game_w_questions.current_level = Question::QUESTION_LEVELS.max
+        expect(game_w_questions.answer_current_question!(
+          game_w_questions.current_game_question.correct_answer_key
+                                                        )).to be_truthy
 
-        q = game_w_questions.current_game_question
-        method = game_w_questions.answer_current_question!(q.correct_answer_key)
-        # повышаем текущий уровень вопроса, если ответ верен
-        level += 1
-
-        expect(game_w_questions.current_level).to eq(level)
-        expect(method).to be true
+        expect(game_w_questions.status).to be :won
+        expect(game_w_questions.prize).to eq(1000000)
       end
+    end
 
-      context "if answer is wrong" do
-        it 'return false & add users balance' do
-          q = game_w_questions.current_game_question
+    context "time is finish" do
+      it 'return false' do
+        game_w_questions.created_at = 1.hour.ago
+        game_w_questions.time_out!
 
-          method = game_w_questions.answer_current_question!(q.correct_answer_key)
-          method = false
-
-          expect(game_w_questions.current_game_question).not_to eq q
-          expect(method).to eq false
-
-          game_w_questions.send(:finish_game!)
-          game_w_questions.is_failed = true
-
-          game_w_questions.current_level = 5
-          game_w_questions.send(:fire_proof_prize, (game_w_questions.previous_level))
-
-          # наталкиваемся на FIREPROOF_LEVELS
-          if game_w_questions.previous_level == 4
-            prize = 1_000
-            expect(prize).to be > 0
-
-            user.balance += prize
-            expect(user.balance).to be prize
-          end
-        end
-      end
-
-      context 'when question is last in game' do
-        it 'finish the game' do
-          level = game_w_questions.current_level
-          # текущий уровень вопроса; проверим что он его и вернёт
-          expect(game_w_questions.current_level).to eq(level)
-
-          q = game_w_questions.current_game_question
-          method = game_w_questions.answer_current_question!(q.correct_answer_key)
-          # повышаем текущий уровень вопроса, если ответ верен
-          level += 1
-
-          expect(game_w_questions.current_level).to eq(level)
-
-          game_w_questions.current_level = 14
-          last_q = game_w_questions.current_level
-
-          if last_q == Question::QUESTION_LEVELS.max + 1
-            game_w_questions.send(:finish_game!)
-            game_w_questions.is_failed = false
-
-            prize = PRIZES[Question::QUESTION_LEVELS.max]
-
-            expect(prize).to be > 0
-
-            user.balance += prize
-            expect(user.balance).to be prize
-          end
-        end
-      end
-
-      context "time is finish" do
-        it 'return false' do
-          game_w_questions.finished_at = Time.now
-          expect(game_w_questions.finished?).to be_truthy
-
-          game_w_questions.created_at = 1.hour.ago
-          game_w_questions.is_failed = true
-
-          expect(game_w_questions.is_failed).to be_truthy
-          expect(game_w_questions.status).to be :timeout
-        end
+        expect(game_w_questions.is_failed).to be_truthy
+        expect(game_w_questions.status).to be :timeout
       end
     end
   end
