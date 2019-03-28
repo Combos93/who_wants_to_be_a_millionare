@@ -125,14 +125,13 @@ RSpec.describe GamesController, type: :controller do
     end
 
     it 'answer was wrong' do
-      method = game_w_questions.answer_current_question!(game_w_questions.current_game_question.correct_answer_key)
-      method = false
-      # expect(game_question.correct_answer_key).to eq 'b'
-      put :answer, params: { id: game_w_questions.id, letter: method }
+      put :answer, params: { id: game_w_questions.id, letter: "c" }
 
       game = assigns(:game)
 
       expect(game.finished?).to be_truthy
+      expect(game.status).to eq(:fail)
+
       expect(response).to redirect_to(user_path(user))
       expect(flash[:alert]).to be
     end
