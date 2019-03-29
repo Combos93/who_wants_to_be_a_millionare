@@ -100,17 +100,20 @@ RSpec.describe Game, type: :model do
   end
 
   describe '#answer_current_question!' do
-    context "when answer was wrong and game was finishing" do
+    context "when answer was wrong" do
       it 'game was finishing' do
         game_w_questions.current_level = 12
+
         expect(game_w_questions.answer_current_question!('c')).to be_falsey
+        expect(game_w_questions.status).to be :fail
         expect(game_w_questions.finished?).to be_truthy
       end
     end
 
     context 'when question is last in game' do
       it 'won the game' do
-        game_w_questions.current_level = Question::QUESTION_LEVELS.max
+        game_w_questions.current_level = 14
+
         expect(game_w_questions.answer_current_question!(
           game_w_questions.current_game_question.correct_answer_key
                                                         )).to be_truthy
@@ -123,10 +126,20 @@ RSpec.describe Game, type: :model do
     context "time is finish" do
       it 'return false' do
         game_w_questions.created_at = 1.hour.ago
-        game_w_questions.time_out!
+        game_w_questions.answer_current_question!('a')
 
         expect(game_w_questions.is_failed).to be_truthy
         expect(game_w_questions.status).to be :timeout
+      end
+    end
+
+    context "when answer was right" do
+      it 'the game continues' do
+        game_w_questions.current_level = 2
+
+        expect(game_w_questions.answer_current_question!('d')).to be_truthy
+        expect(game_w_questions.status).to be :in_progress
+        expect(game_w_questions.finished?).to be_falsey
       end
     end
   end

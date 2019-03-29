@@ -153,7 +153,7 @@ RSpec.describe GamesController, type: :controller do
 
     it "uses fifty_fifty" do
       expect(game_w_questions.current_game_question.help_hash[:fifty_fifty]).not_to be
-      expect(game_w_questions.friend_call_used).to be_falsey
+      expect(game_w_questions.fifty_fifty_used).to be_falsey
 
       put :help, params: { id: game_w_questions.id, help_type: :fifty_fifty }
       game = assigns(:game)
