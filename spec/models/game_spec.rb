@@ -127,11 +127,12 @@ RSpec.describe Game, type: :model do
     context "time is finish" do
       it 'return false' do
         game_w_questions.created_at = 1.hour.ago
-        game_w_questions.answer_current_question!('a')
+
+        expect(game_w_questions.answer_current_question!(
+        game_w_questions.current_game_question.correct_answer_key)).to be_falsey
 
         expect(game_w_questions.finished?).to be_truthy
-        expect(game_w_questions.answer_current_question!(
-          game_w_questions.current_game_question.correct_answer_key)).to be_falsey
+
         expect(game_w_questions.status).to be :timeout
       end
     end
